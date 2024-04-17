@@ -1,0 +1,1 @@
+ /Users/anikamenz/mobile_applikationen/first-portfolio-exam/project_1/.dart_tool/flutter_build/5bfab6ed092b7300a291db2a9824d211/native_assets.yaml: 
