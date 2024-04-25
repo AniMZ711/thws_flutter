@@ -50,8 +50,7 @@ class DatabaseService {
       Recipe recipe = Recipe.fromMap({
         'name': recipeJson['name'],
         'category': recipeJson['category'],
-        'ingredients': recipeJson['ingredients'].join(
-            ',') // Join the list of ingredients into a comma-separated string
+        'ingredients': recipeJson['ingredients'].join(',')
       });
 
       // Insert the recipe into the database

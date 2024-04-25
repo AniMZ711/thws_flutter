@@ -15,7 +15,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   final DatabaseService _databaseService = DatabaseService();
   final Logger _logger = Logger();
   List<String> categories = [];
-  bool isLoading = true; // To show loading indicator
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -29,7 +29,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   void _loadCategories() async {
-    print("Loading categories..."); // Debug statement
     _logger.d("Starting to load categories.");
     try {
       categories = await _databaseService.getCategories();
@@ -44,24 +43,11 @@ class _CategoryScreenState extends State<CategoryScreen> {
     }
   }
 
-  // void loadCategories() async {
-  //   try {
-  //     categories = await _databaseService.getCategories();
-  //     _logger.i("Categories loaded successfully.");
-  //   } catch (e) {
-  //     _logger.e("Failed to load categories: $e");
-  //   } finally {
-  //     setState(() {
-  //       isLoading = false; // Update the loading state
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Color.fromARGB(255, 78, 81, 85),
+          backgroundColor: const Color.fromARGB(255, 78, 81, 85),
           title:
               const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.restaurant_menu, size: 26),
@@ -71,9 +57,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ]),
         ),
         body: isLoading
-            ? const Center(
-                child:
-                    CircularProgressIndicator()) // Show loading indicator while data is being fetched
+            ? const Center(child: CircularProgressIndicator())
             : Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: ListView.builder(

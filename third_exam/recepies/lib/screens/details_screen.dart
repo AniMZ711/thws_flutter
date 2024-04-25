@@ -47,9 +47,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
           child: Text(
             style: const TextStyle(color: Colors.white, fontSize: 22),
             "Ingredients of ${widget.recipe}",
-            softWrap: true, // Allows text to wrap onto the next line
+            softWrap: true,
             overflow: TextOverflow.fade,
-            // Fades text that overflows
           ),
         ),
       ),
