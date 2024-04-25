@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/recipe.dart';
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 
 class DatabaseService {
   static final DatabaseService _databaseService = DatabaseService._internal();
@@ -11,22 +12,17 @@ class DatabaseService {
   DatabaseService._internal();
 
   static Database? _database;
-
-  // Future<Database> get database async {
-  //   _database ??= await _initDatabase();
-  //   return _database!;
-  // }
+  final Logger _logger = Logger();
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
+    _database ??= await _initDatabase();
     return _database!;
   }
 
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'flutter_database.db');
-
+    _logger.d("Database path: $path");
     return await openDatabase(
       path,
       onCreate: _onCreate,
@@ -39,6 +35,7 @@ class DatabaseService {
     await db.execute('DROP TABLE IF EXISTS recipes');
     await db.execute(
         'CREATE TABLE recipes (id INTEGER PRIMARY KEY, name TEXT, category TEXT, ingredients TEXT)');
+    await loadRecipesFromJSON();
   }
 
   //read json file
@@ -59,7 +56,6 @@ class DatabaseService {
 
       // Insert the recipe into the database
       await DatabaseService._databaseService.insertRecipe(recipe);
-      print("Recepies loaded");
     }
   }
 
@@ -71,12 +67,32 @@ class DatabaseService {
   }
 
   // retrieve all recipes from database
-  Future<List<Recipe>> recipes() async {
+  Future<List<Recipe>> getRecipes() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('recipes');
     return List.generate(maps.length, (i) {
       return Recipe.fromMap(maps[i]);
     });
+  }
+
+  Future<List<Recipe>> getRecipesByCategory(String category) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+        await db.query('recipes', where: 'category = ?', whereArgs: [category]);
+    return List.generate(maps.length, (i) {
+      return Recipe.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<String>> getIngredientsByRecipe(String recipe) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps =
+        await db.query('recipes', where: 'name = ?', whereArgs: [recipe]);
+
+    if (maps.isNotEmpty) {
+      return maps.first['ingredients'].split(',');
+    }
+    return [];
   }
 
   // update a recipe
@@ -102,5 +118,21 @@ class DatabaseService {
     return List.generate(maps.length, (i) {
       return Recipe.fromMap(maps[i]);
     });
+  }
+
+  Future<List<String>> getCategories() async {
+    final db = await database;
+
+    try {
+      final List<Map<String, dynamic>> maps =
+          await db.query('recipes', columns: ['DISTINCT category']);
+      List<String> categories =
+          maps.map((map) => map['category'] as String).toList();
+
+      return categories;
+    } catch (e) {
+      _logger.e("Failed to get categories: $e");
+      return [];
+    }
   }
 }
